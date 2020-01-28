@@ -79,65 +79,35 @@ def group_adjust(vals, groups, weights):
             raise ValueError(
                 "Number of items in each group must equal number of vals")
 
-    group_means = []
+    weighted_means = [0 for num in vals]
 
     # Iterate through the groups and create a list of group means
-    for group in groups:
-        group_mean = []
+    for group, weight in zip(groups, weights):
         mean_dict = {}
+        value_group = 0
 
-        # Build a dictionary of Key -> List of values
-        start = datetime.now()
-
-        for item in range(len(group)):
-            key = group[item]
-            if key not in mean_dict:
-                mean_dict[key] = [vals[item]]
+        # Build a dictionary of Group Item -> List of values
+        mean_dict = {}
+        for group_zip, val in zip(group, vals):
+            if group_zip not in mean_dict:
+                mean_dict[group_zip] = [val]
             else:
-                mean_dict[key].append(vals[item])
+                mean_dict[group_zip].append(val)
 
-        end = datetime.now()
-        print("Dictionary build: " + str(end - start))
+        # Calculate the mean of the List of values and update the weighted mean array
+        for value_list in mean_dict.values():
 
-        # Calculate the mean of the List of values and add it to the group means
-        start = datetime.now()
-        for lst in mean_dict.values():
-            mean = s.mean(val for val in lst if val is not None)
-            group_mean.extend([mean for index in range(len(lst))])
-        group_means.append(group_mean)
-        end = datetime.now()
-        print("Calculate means: " + str(end - start))
+            # The weighted mean is the mean of all the values * weight
+            weighted_mean = s.mean(
+                val for val in value_list if val is not None) * weight
 
-    weighted_means = []
+            # Update the weighted mean array
+            for index in range(len(value_list)):
+                weighted_means[value_group] += weighted_mean
+                value_group += 1
 
-    start = datetime.now()
-
-    for mean_group in zip(*group_means):
-        weighted_means.append(
-            sum(mean*weight for mean, weight in zip(mean_group, weights)))
-
-    end = datetime.now()
-    print("Weighted Means: " + str(end - start))
-    start = datetime.now()
+    # Finally calculate the demeaned values
     final_values = [x if x is None else x-y for x,
                     y in zip(vals, weighted_means)]
-    end = datetime.now()
-    print("Final: " + str(end - start))
+
     return final_values
-
-    # raise NotImplementedError
-vals = [1, None, 3, 8, 5]
-grps_1 = ['USA', 'USA', 'USA', 'USA', 'USA']
-grps_2 = ['MA', 'MA', 'MA', 'RI', 'RI']
-grps_3 = ['WEYMOUTH', 'BOSTON', 'BOSTON', 'PROVIDENCE', 'PROVIDENCE']
-weights = [.15, .35, .5]
-
-vals = 1000000*[1, None, 3, 5, 8, 7]
-# If you're doing numpy, use the np.NaN instead
-#vals = 1000000 * [1, np.NaN, 3, 5, 8, 7]
-grps_1 = 1000000 * [1, 1, 1, 1, 1, 1]
-grps_2 = 1000000 * [1, 1, 1, 1, 2, 2]
-grps_3 = 1000000 * [1, 2, 2, 3, 4, 5]
-weights = [.20, .30, .50]
-
-group_adjust(vals, [grps_1, grps_2, grps_3], weights)
