@@ -1,6 +1,4 @@
-import pytest
-from datetime import datetime
-import statistics as s
+import numpy as np
 
 # Your task is to write the group adjustment method below. There are some
 # unimplemented unit_tests at the bottom which also need implementation.
@@ -49,29 +47,6 @@ import statistics as s
 
 
 def group_adjust(vals, groups, weights):
-    """
-    Calculate a group adjustment (demean).
-
-    Parameters
-    ----------
-
-    vals    : List of floats/ints
-
-        The original values to adjust
-
-    groups  : List of Lists
-
-        A list of groups. Each group will be a list of ints
-
-    weights : List of floats
-
-        A list of weights for the groupings.
-
-    Returns
-    -------
-
-    A list-like demeaned version of the input values
-    """
     if len(groups) != len(weights):
         raise ValueError("Number of groups must equal number of weights")
     for group in groups:
@@ -79,37 +54,31 @@ def group_adjust(vals, groups, weights):
             raise ValueError(
                 "Number of items in each group must equal number of vals")
 
-    weighted_means = [0 for num in vals]
+    # Turn all inputs into NP arrays
+    vals = np.array(vals)
+    groups = np.array(groups)
+    weights = np.array(weights)
 
-    # Iterate through the groups and create a list of group means
+    # Create an empty array for the weighted means that we calculate
+    weighted_means = np.zeros(len(vals))
+
+    # For each group in the group list, take the weight and calculate the weighted means for each unique element
     for group, weight in zip(groups, weights):
-        mean_dict = {}
-        value_group = 0
+        u = np.unique(group)
 
-        # Build a dictionary of Group Item -> List of values
-        mean_dict = {}
-        for group_zip, val in zip(group, vals):
-            if group_zip not in mean_dict:
-                mean_dict[group_zip] = [val]
-            else:
-                mean_dict[group_zip].append(val)
+        # For each unique group calculate a weighted mean by:
+        #  1. Get the positions of the elements in the group and select the values that we are interested in from vals
+        #  2. Calculate a weighted mean and use the positions to apply it to the accumulated weighted means
+        for group_num in u:
+            positions = [group == group_num]
 
-        # Calculate the mean of the List of values and update the weighted mean array
-        for value_list in mean_dict.values():
+            group_vals = np.select(positions, [vals], np.NaN)
+            weighted_mean = np.nanmean(group_vals) * weight
+            mean_array = np.zeros(len(vals))
+            np.putmask(mean_array, positions, weighted_mean)
+            weighted_means += mean_array
 
-            # The weighted mean is the mean of all the values * weight
-            weighted_mean = s.mean(
-                val for val in value_list if val is not None) * weight
+    # Final demeaned values
+    final_vals = vals - weighted_means
 
-            # Update the weighted mean array
-            i = 0
-            while i < len(value_list):
-                weighted_means[value_group] += weighted_mean
-                i += 1
-                value_group += 1
-
-    # Finally calculate the demeaned values
-    final_values = [x if x is None else x-y for x,
-                    y in zip(vals, weighted_means)]
-
-    return final_values
+    return final_vals

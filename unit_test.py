@@ -2,7 +2,7 @@ import pytest
 from datetime import datetime
 import numpy as np
 
-from solution import group_adjust
+from numpy_solution import group_adjust
 
 
 def test_three_groups():
@@ -46,8 +46,8 @@ def test_two_groups():
 def test_missing_vals():
     # If you're using NumPy or Pandas, use np.NaN
     # If you're writing pyton, use None
-    #vals = [1, np.NaN, 3, 5, 8, 7]
-    vals = [1, None, 3, 5, 8, 7]
+    vals = [1, np.NaN, 3, 5, 8, 7]
+    #vals = [1, None, 3, 5, 8, 7]
     grps_1 = ['USA', 'USA', 'USA', 'USA', 'USA', 'USA']
     grps_2 = ['MA', 'RI', 'RI', 'CT', 'CT', 'CT']
     weights = [.65, .35]
@@ -56,8 +56,8 @@ def test_missing_vals():
 
     # This should be None or np.NaN depending on your implementation
     # please feel free to change this line to match yours
-    #answer = [-2.47, np.NaN, -1.170, -0.4533333, 2.54666666, 1.54666666]
-    answer = [-2.47, None, -1.170, -0.4533333, 2.54666666, 1.54666666]
+    answer = [-2.47, np.NaN, -1.170, -0.4533333, 2.54666666, 1.54666666]
+    #answer = [-2.47, None, -1.170, -0.4533333, 2.54666666, 1.54666666]
 
     for ans, res in zip(answer, adj_vals):
         if ans is None:
@@ -95,9 +95,9 @@ def test_group_len_equals_vals_len():
 
 
 def test_performance():
-    vals = 1000000*[1, None, 3, 5, 8, 7]
+    #vals = 1000000*[1, None, 3, 5, 8, 7]
     # If you're doing numpy, use the np.NaN instead
-    #vals = 1000000 * [1, np.NaN, 3, 5, 8, 7]
+    vals = 1000000 * [1, np.NaN, 3, 5, 8, 7]
     grps_1 = 1000000 * [1, 1, 1, 1, 1, 1]
     grps_2 = 1000000 * [1, 1, 1, 1, 2, 2]
     grps_3 = 1000000 * [1, 2, 2, 3, 4, 5]
