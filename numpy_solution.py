@@ -69,8 +69,8 @@ def group_adjust(vals, groups, weights):
         # For each unique group calculate a weighted mean by:
         #  1. Get the positions of the elements in the group and select the values that we are interested in from vals
         #  2. Calculate a weighted mean and use the positions to apply it to the accumulated weighted means
-        for group_num in u:
-            positions = [group == group_num]
+        for group_name in u:
+            positions = [group == group_name]
 
             group_vals = np.select(positions, [vals], np.NaN)
             weighted_mean = np.nanmean(group_vals) * weight
